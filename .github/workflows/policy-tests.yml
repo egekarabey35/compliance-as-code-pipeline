@@ -44,5 +44,7 @@ jobs:
             echo "::error::Unsafe Terraform fixture was incorrectly accepted"
             exit 1
           fi
+      - name: Test audit evidence generator
+        run: python3 -m unittest discover -s tests -v
       - name: Validate Python audit reporter syntax
         run: python3 -m py_compile scripts/generate-audit-pack.py
