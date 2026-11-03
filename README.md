@@ -1,39 +1,24 @@
-# Cloud-Native Runtime Security & Automated Remediation Engine
+# Compliance-as-Code Pipeline
 
-An eBPF-driven runtime security and active defense architecture designed for high-risk fintech environments. Tailored to protect and isolate compromised workloads running the TRC-20 Vault Webhook Gateway.
+This repository contains a policy-as-code and audit-evidence demonstration using Checkov, OPA/Conftest, Trivy, Gitleaks, Terraform, GitHub Actions workflow definitions, and Cosign.
 
----
+## Project location
 
-## Architecture Overview
+The main project and its detailed documentation are located in the [compliance-as-code-pipeline subdirectory](./compliance-as-code-pipeline/).
 
-1. Detection: Falco monitors Linux kernel syscalls via eBPF driver.
-2. Trigger: CRITICAL priority events are forwarded via HTTP webhook.
-3. Remediation: Go worker patches target pod with security.quarantine=true.
-4. Isolation: Deny-All NetworkPolicy matches quarantine label and cuts all traffic.
-5. Forensics: Container remains alive without network access for incident response.
+- [Project README](./compliance-as-code-pipeline/README.md)
+- [Workflow definition](./compliance-as-code-pipeline/.github/workflows/compliance.yaml)
+- [Policy files](./compliance-as-code-pipeline/policies/)
+- [Infrastructure examples](./compliance-as-code-pipeline/infrastructure/)
+- [Audit pack generator](./compliance-as-code-pipeline/scripts/generate-audit-pack.py)
+- [Test fixtures](./compliance-as-code-pipeline/test-workloads/)
 
-### Detection Rules
-- Unauthorized Shell Spawn in TRC20 Gateway (sh, bash, ash)
-- Unauthorized Read of Injected Vault Secret (/vault/secrets/webhook-secret)
-- Outbound Network Connection to Non-Whitelisted Endpoint
+## Notes for reviewers
 
----
+The workflow file is currently stored inside the subdirectory, not in the repository-root .github/workflows directory. Its presence does not establish that GitHub Actions automatically runs it on repository events.
 
-## Alert Noise Tuning
+The workflow configuration refers to example cloud resources that require configuration before end-to-end execution. This is an educational implementation and does not constitute an independently verified compliance audit.
 
-| Metric | Default Falco | Hardened Ruleset | Delta |
-|---|---|---|---|
-| Alert Frequency | ~142 alerts/hr | < 2 alerts/hr | -98.5% |
-| False-Positive Noise | High | Near Zero | Scannable |
-| Actionable Precision | Low | High | High Fidelity |
+Other top-level folders contain runtime-security examples; the [separate Falco repository](https://github.com/egekarabey35/falco-runtime-security) documents that work.
 
----
-
-## Attack Simulation
-
-Execute the automated simulation script:
-./scripts/simulate-attack.sh
-
-### Operational Portability Note
-> **ClusterIP Customization:** The API Server CIDR `10.96.0.1/32` in `remediation-networkpolicy.yaml` reflects standard local/kind environments. In managed environments (EKS/GKE), extract the exact ClusterIP via:
-> `kubectl get svc kubernetes -n default -o jsonpath="{.spec.clusterIP}"` and patch the CIDR accordingly.
+Please inspect the linked subdirectory for the compliance implementation.
